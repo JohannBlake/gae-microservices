@@ -1,10 +1,10 @@
 # Developing and Debugging Google App Engine Microservices Locally
 
-[The Concept](#the-concept)
-[Routing Requests](#routing-requests)
-[Running a Build](#running-a-build)
-[Debugging Services](#debugging-services)
-[Deploying to GAE](#deploying-to-gae)
+* [The Concept](#the-concept)
+* [Routing Requests](#routing-requests)
+* [Running a Build](#running-a-build)
+* [Debugging Services](#debugging-services)
+* [Deploying to GAE](#deploying-to-gae)
 
 
 This document describes a solution to setup and debug a Google App Engine project in IntelliJ that is designed to support microservices.
