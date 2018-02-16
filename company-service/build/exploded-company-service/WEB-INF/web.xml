@@ -13,7 +13,6 @@
         <url-pattern>/company/*</url-pattern>
     </servlet-mapping>
 
-    <!--This is for https-->
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>companyServlet</web-resource-name>
