@@ -1,5 +1,7 @@
 # Developing and Debugging Google App Engine Microservices Locally
 
+[The Concept](#the-concept)
+
 This document describes a solution to setup and debug a Google App Engine project in IntelliJ that is designed to support microservices.
 
 If you have read the Google Cloud Platform (GCP) docs on setting up, debugging and deploying a Java app, you will discover that there is no information provided on best practices on how to deal with microservices - at least at the time of this writing.
@@ -37,7 +39,7 @@ Even though I don't use the plugin for running the app locally, I do use it for 
 Building your app with Gradle is not required however to setup a project or debug your app locally. I do use a custom gradle task that is part of the debugging phase but you can replace this with some other method that is more in line with whatever packaging/deployment tools you use. More info on this is described later on below.
 
 
-## The Concept
+## <a name="the-concept"></a>The Concept
 
 A GAE project consists of multiple modules where each module is considered a service (or microservice if you will) and each module is located as a folder at the root of the project. Each project contains its own build.gradle file and when
 
