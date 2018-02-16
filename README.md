@@ -189,9 +189,12 @@ Save the configuration. Then hit the Debug button. You can now use breakpoints a
 
 ![Configuration Settings](/images/intellij-config-debug.png)
 
+It should be noted that every time you modify your code, you need to reload it into the App Dev Server. You need to stop the server with Ctl-C and restart it after you've recombined your modules.
+
 ## Deploying to GAE
 To deploy your services to GAE using gradle, you need to deploy each module separately although a gradle task could be used to do all of them at once. To deploy a module, use your terminal and navigate to the module's folder and run:
 
 ```gradle appengineDeploy```
 
-This task is only available in the Google Cloud SDK gradle plugin.
+This task is only available in the Google Cloud SDK gradle plugin. Uploading all modules at once is generally only something you would do once. Under normal development, you will usually modify one or two modules and want to only upload those without having to upload all the other ones that haven't changed.
+
