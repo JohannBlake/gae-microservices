@@ -188,3 +188,10 @@ Click on the + symbol in the top left corner to add a configuration. Scroll down
 Save the configuration. Then hit the Debug button. You can now use breakpoints and debug your app. Here is how the configuration settings look in IntelliJ:
 
 ![Configuration Settings](/images/intellij-config-debug.png)
+
+## Deploying to GAE
+To deploy your services to GAE using gradle, you need to deploy each module separately although a gradle task could be used to do all of them at once. To deploy a module, use your terminal and navigate to the module's folder and run:
+
+```gradle appengineDeploy```
+
+This task is only available in the Google Cloud SDK gradle plugin.
