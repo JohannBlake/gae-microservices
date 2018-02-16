@@ -1,6 +1,11 @@
 # Developing and Debugging Google App Engine Microservices Locally
 
 [The Concept](#the-concept)
+[Routing Requests](#routing-requests)
+[Running a Build](#running-a-build)
+[Debugging Services](#debugging-services)
+[Deploying to GAE](#deploying-to-gae)
+
 
 This document describes a solution to setup and debug a Google App Engine project in IntelliJ that is designed to support microservices.
 
@@ -87,7 +92,7 @@ NOTE: If you get an error when you click on the Modules link, you probably need 
 
 The CopyBuild task copies and overwrites existing files. It never deletes files. So when you place your combined appengine-web.xml and web.xml into the output folder, you don't have to worry about it being deleted each time you run CopyBuild. The only time you need to update these files is when you add new modules or remove them.
 
-## Routing Requests
+## <a name="the-concept"></a>Routing Requests
 
 One of our goals is also to use a consistent url that closely matches the service endpoints when the app is deployed to GAE. Using urls like 
 
@@ -155,7 +160,7 @@ The only downside to setting the domains in the hosts file is that when you want
 
 [https://www.charlesproxy.com/documentation/tools/map-remote/](https://www.charlesproxy.com/documentation/tools/map-remote/)
 
-## Running a Build
+## <a name="the-concept">Running a Build
 To create the build files, you use your terminal (on a Mac) and navigate to the module's folder (not the project's root folder). Then you execute:
 
 ```gradle assemble```
@@ -173,7 +178,7 @@ After you've built each module, use your terminal and change to the project's ro
 If you haven't already done so, manually create the appengine-web.xml and web.xml files and copy those to the combined exploded folder as was previously mentioned.
 
 
-## Debugging the Services
+## <a name="debugging-services">Debugging Services
 
 While IntelliJ is used here to debug the services, you can use any IDE that has the ability to attach to a JVM instance. Before you can debug the service, you need to make sure that App Dev Server is running. The sample app includes a bash script that you can run. In the project's root folder is a file called runApp.sh. To run this, in a terminal run:
 
@@ -193,7 +198,7 @@ Save the configuration. Then hit the Debug button. You can now use breakpoints a
 
 It should be noted that every time you modify your code, you need to reload it into the App Dev Server. You need to stop the server with Ctl-C and restart it after you've recombined your modules.
 
-## Deploying to GAE
+## <a name="deploying-to-gae">Deploying to GAE
 To deploy your services to GAE using gradle, you need to deploy each module separately although a gradle task could be used to do all of them at once. To deploy a module, use your terminal and navigate to the module's folder and run:
 
 ```gradle appengineDeploy```

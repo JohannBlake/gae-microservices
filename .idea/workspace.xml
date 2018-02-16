@@ -54,7 +54,7 @@
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="SPLIT">
               <first_editor relative-caret-position="1717">
-                <caret line="202" column="0" selection-start-line="202" selection-start-column="0" selection-end-line="202" selection-end-column="0" />
+                <caret line="207" column="0" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
                 <folding />
               </first_editor>
               <second_editor>
@@ -749,7 +749,7 @@
       <option name="presentableId" value="Default" />
       <updated>1518774090444</updated>
       <workItem from="1518774092310" duration="308000" />
-      <workItem from="1518774406683" duration="11307000" />
+      <workItem from="1518774406683" duration="11509000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <created>1518778165201</created>
@@ -786,11 +786,18 @@
       <option name="project" value="LOCAL" />
       <updated>1518796551756</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Updated README.md">
+      <created>1518796870464</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1518796870464</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11615000" />
+    <option name="totallyTimeSpent" value="11817000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="943" extended-state="0" />
@@ -1091,7 +1098,7 @@
       <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="1717">
-            <caret line="202" column="0" selection-start-line="202" selection-start-column="0" selection-end-line="202" selection-end-column="0" />
+            <caret line="207" column="0" selection-start-line="207" selection-start-column="0" selection-end-line="207" selection-end-column="0" />
             <folding />
           </first_editor>
           <second_editor>
