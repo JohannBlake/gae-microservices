@@ -1,0 +1,11 @@
+task CopyBuild(type: Copy) {
+    from('company-service/build/exploded-company-service') {
+        exclude '**/appengine-web.xml', '**/web.xml'
+    }
+    into('build/exploded-services')
+
+    from('employees-service/build/exploded-employees-service'){
+        exclude '**/appengine-web.xml', '**/web.xml'
+    }
+    into('build/exploded-services')
+}
