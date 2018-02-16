@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+  <runtime>java8</runtime>
+  <threadsafe>true</threadsafe>
+  <module>company-service</module>
+  <module>employees-service</module>
+  <version>1</version>
+
+  <static-files>
+    <include path="/**.html">
+    </include>
+    <include path="/images/**.jpg">
+    </include>
+    <include path="/css/**.css">
+    </include>
+  </static-files>
+</appengine-web-app>
