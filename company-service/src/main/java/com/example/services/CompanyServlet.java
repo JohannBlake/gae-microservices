@@ -27,7 +27,7 @@ public class CompanyServlet extends HttpServlet {
             serviceUrl = "http://" + EMPLOYEES_DOMAIN + ":8080";
         }
 
-        URL url = new URL(serviceUrl + "/employees/v1/");
+        URL url = new URL(serviceUrl + EMPLOYEES_PATH);
         URLConnection conn = url.openConnection();
 
         conn.setDoOutput(true);
