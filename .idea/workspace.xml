@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c36c521b-6c76-4706-a3af-a1607d0ee848" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/images/charles-map-remote.png" afterPath="$PROJECT_DIR$/images/charles-map-remote.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
     </list>
     <ignored path="gae-microservices.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -1724,7 +1724,7 @@
       <workItem from="1518774406683" duration="12108000" />
       <workItem from="1518855269518" duration="3005000" />
       <workItem from="1518944319471" duration="3377000" />
-      <workItem from="1518947869452" duration="2068000" />
+      <workItem from="1518947869452" duration="2343000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <created>1518778165201</created>
@@ -1824,11 +1824,18 @@
       <option name="project" value="LOCAL" />
       <updated>1518956856115</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Scaled image down">
+      <created>1518956964565</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1518956964565</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="20866000" />
+    <option name="totallyTimeSpent" value="21141000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="943" extended-state="0" />

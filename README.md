@@ -214,9 +214,10 @@ This will recompile your code, copy the build output files from each module to t
 There is however one minor issue to keep in mind. Even after **gradle build** has completed, you will probably have to wait about 8 seconds before the local web server has acknowledged the changes and completed updating the JVM. On my machine it took between 5 to 8 seconds. If you don't wait for this amount of time and make a request to your services, you will get served with the older version and breakpoints will not line up. If you find this annoyingly too long, you can always manually restart the local web server and then restart debugging in IntelliJ. If your fast enough and can do it under 8 seconds, that may be your preferred method. Be aware though that when you terminate the local web server (if it was started with **gradle appengineRun**), you need to wait until the JVM has stopped. The Java app icon on the OS taskbar needs to be gone. If it's not gone and you attempt to restart the web server, you will get an error indicating that the address is already in use. This doesn't happen if you start the web server manually (using **dev_appserver.sh**).
 
 ## <a name="deploying-to-gae">Deploying to GAE
-To deploy your services to GAE using gradle, you need to deploy each module separately although a gradle task could be used to do all of them at once. To deploy a module, use your terminal and navigate to the module's folder and run:
+To deploy your services to GAE using gradle, you can either deploy each module separately or deploy all of them together. To deploy run:
 
 ```gradle appengineDeploy```
 
-This task is only available in the Google Cloud SDK gradle plugin. Uploading all modules at once is generally only something you would do once. Under normal development, you will usually modify one or two modules and want to only upload those without having to upload all the other ones that haven't changed.
+If you run this from the project's root folder, all the modules will be deployed. If you run this from a module's directory, only that module will be deployed. Even if you deploy from the project's root folder, the gradle task will make sure to upload each appengine-web.xml and web.xml file for each module. It will not use the files from the combined build directory.
 
+One problem I have encountered was when it failed to deploy and I discovered that I had to shut down Charles and comment out any of the mappings I made in the hosts file. It seems that the gradle task may need to address those urls as they would be available on GAE and not locally.
