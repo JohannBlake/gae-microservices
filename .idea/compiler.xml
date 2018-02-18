@@ -18,5 +18,13 @@
         <processorPath useClasspath="true" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="company-service_main" target="1.8" />
+      <module name="company-service_test" target="1.8" />
+      <module name="employees-service_main" target="1.8" />
+      <module name="employees-service_test" target="1.8" />
+      <module name="gae-microservices_main" target="1.8" />
+      <module name="gae-microservices_test" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

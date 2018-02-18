@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -34,8 +35,11 @@ public class CompanyServlet extends HttpServlet {
         String line;
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
+        PrintWriter out = resp.getWriter();
+        out.println("Company service called");
+
         while ((line = reader.readLine()) != null) {
-            System.out.println(line);
+            out.println("Response from Employees service: " + line);
         }
         reader.close();
     }

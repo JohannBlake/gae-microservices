@@ -8,3 +8,5 @@
  */
 
 rootProject.name = 'gae-microservices'
+include 'company-service'
+include 'employees-service'

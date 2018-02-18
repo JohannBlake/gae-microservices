@@ -2,9 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/company-service/company-service.iml" filepath="$PROJECT_DIR$/company-service/company-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/employees-service/employees-service.iml" filepath="$PROJECT_DIR$/employees-service/employees-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/gae-microservices.iml" filepath="$PROJECT_DIR$/gae-microservices.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/company-service/company-service.iml" filepath="$PROJECT_DIR$/.idea/modules/company-service/company-service.iml" group="company-service" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/company-service/company-service_main.iml" filepath="$PROJECT_DIR$/.idea/modules/company-service/company-service_main.iml" group="company-service" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/company-service/company-service_test.iml" filepath="$PROJECT_DIR$/.idea/modules/company-service/company-service_test.iml" group="company-service" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/employees-service/employees-service.iml" filepath="$PROJECT_DIR$/.idea/modules/employees-service/employees-service.iml" group="employees-service" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/employees-service/employees-service_main.iml" filepath="$PROJECT_DIR$/.idea/modules/employees-service/employees-service_main.iml" group="employees-service" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/employees-service/employees-service_test.iml" filepath="$PROJECT_DIR$/.idea/modules/employees-service/employees-service_test.iml" group="employees-service" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gae-microservices.iml" filepath="$PROJECT_DIR$/.idea/modules/gae-microservices.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gae-microservices_main.iml" filepath="$PROJECT_DIR$/.idea/modules/gae-microservices_main.iml" group="gae-microservices" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gae-microservices_test.iml" filepath="$PROJECT_DIR$/.idea/modules/gae-microservices_test.iml" group="gae-microservices" />
     </modules>
   </component>
 </project>

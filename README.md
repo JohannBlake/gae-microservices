@@ -13,11 +13,13 @@ If you have read the Google Cloud Platform (GCP) docs on setting up, debugging a
 
 Ideally, developers would love to create all of their services within a single IntelliJ project, set some breakpoints, hit Debug and your done. In reality, it is much more complex that this and there are a number of solutions posted on how to debug microservices.
 
-There is a gradle plugin available that does allow you load multiple services into the local dev server that ships as part of the Google Cloud SDK. The biggest issue with this plugin is that it will create a random port for each service. This means that every time you restart debugging, the urls that point to each service have a different port. This is a serious issue on several levels. If one service needs to communicate with another service, it must include the port number as part of the HTTP request. But if this port number changes every time, you would need a way to update your HTTP request each time. Either you hardcode the port in your code and then change it each time, or you use some config file that your service reads in that contains the updated port number. Either way, you need to manually update either your code or a config file.
+Using the setup as described below, you will be able to run your microservices locally and only have to execute a single gradle task each time you modify your code without having to stop debugging. And as a bonus, you can debug your microservices using the exact same urls as you would use on GAE. There is no need to use localhost.
+
+The Google Cloud SDK has a gradle plugin available that does allow you load multiple services into the local web server that ships as part of the Google Cloud SDK. The biggest issue with this plugin is that it will create a random port for each service. This means that every time you restart debugging, the urls that point to each service have a different port. This is a serious issue on several levels. If one service needs to communicate with another service, it must include the port number as part of the HTTP request. But if this port number changes every time, you would need a way to update your HTTP request each time. Either you hardcode the port in your code and then change it each time, or you use some config file that your service reads in that contains the updated port number. Either way, you need to manually update either your code or a config file.
 
 The gradle plugin for does have a parameter that you can set for the port to use. But after playing around with this I discovered that it only sets the port number on the default service. All the other services still end up getting random port numbers. I cannot understand why any developer at Google would ever do this. This just makes no sense.
 
-If you really want to use the gradle plugin for running your app locally, you'll find information about it here:
+Here is some important links and info about the gradle plugin:
 
 > [https://cloud.google.com/appengine/docs/standard/java/tools/gradle](https://cloud.google.com/appengine/docs/standard/java/tools/gradle)
 >
@@ -37,52 +39,61 @@ If you really want to use the gradle plugin for running your app locally, you'll
 >
 > [https://github.com/patflynn/appengine-potpourri/tree/cloud-sdk-refactor](https://github.com/patflynn/appengine-potpourri/tree/cloud-sdk-refactor)
 
-Even though I don't use the plugin for running the app locally, I do use it for deploying the app to the GAE. So be sure to install the plugin as described at:
+The following documentation makes some changes to how the gradle plugin is used in order to streamline the debugging process.
+
+When creating a build.gradle file for each service, follow the instructions at:
 
 [https://cloud.google.com/appengine/docs/standard/java/tools/gradle](https://cloud.google.com/appengine/docs/standard/java/tools/gradle)
-
-Building your app with Gradle is not required however to setup a project or debug your app locally. I do use a custom gradle task that is part of the debugging phase but you can replace this with some other method that is more in line with whatever packaging/deployment tools you use. More info on this is described later on below.
 
 
 ## <a name="the-concept"></a>The Concept
 
-A GAE project consists of multiple modules where each module is considered a service (or microservice if you will) and each module is located as a folder at the root of the project. Each project contains its own build.gradle file and when
+A GAE project consists of multiple modules where each module is considered a service (or microservice if you will) and each module is located as a folder at the root of the project. Each project contains its own build.gradle file. The root project also contains a build.gradle.
 
-```gradle assemble```
+> NOTE: The build.gradle file in the root project must use
+> ```apply plugin: "com.google.cloud.tools.appengine-standard"```
+> and not:
+> ```apply plugin: 'com.google.cloud.tools.appengine'```
+> There's a bug in the plug and **gradle build** will fail if you use the other plugin. Your modules however should use **com.google.cloud.tools.appengine** because that is how the docs have specified it. If you're using GAE Flexible environment, use **com.google.cloud.tools.appengine-flexible** instead.
 
-is run from within a module's folder, it creates an output folder called **build** which in turn contains an **exploded** folder containing all the files that eventually are used when the module is deployed locally or to the GAE.
+When
 
-The Google Cloud SDK includes a local web server (a.k.a Dev App Server) to host your app locally. The current version of this web server is capable of hosting multiple modules simultaneously. The gradle plugin for GAE handles how multiple modules are loaded (as previously described). But as was mentioned, every module will generate a service running under a random port number, which is what we want to avoid.
+```gradle build```
 
-The documentation on using the Dev App Server is found here:
+is run from the root folder, it builds each module, which creates an output folder called **build/exploded-<module-name>** in the module's own folder, with <module-name> being the name of your module. A custom gradle task called copyBuild is then run, which copies all the files from each of the module's build/exploded-<module-name> folder to a build folder in the project's root, which is called **build/exploded-<project-name>** where <project-name> is the name of your project.
+
+There is no need to stop debugging because a custom gradle task called **reloadApp** is executed after the copying has completed, which causes the local web server to reload the changes. Of course, you need to first start the local web server manually which is done by running:
+
+```gradle appengineRun```
+
+from the project's root folder.
+
+While the local web server (a.k.a Dev App Server) is capable of hosting multiple services, this feature is not used by the solution proposed here due to the limitation of it generating random port numbers for each service. More specifically, the appengine.run.services paramters in the build.gradle file is not used. The appengine.run.jvmFlags is used in order to specify the JVM parameters needed to launch the local web server.
+
+You can of course use the local web server and start it manually if you want to. The advantage of starting it manually is that any exceptions generated by your app that get returned to the local web server will be displayed in the terminal. When the gradle plugin starts the local web server, it isn't shown. Only the Java icon is shown in the OS taskbar, so you won't see any detailed information about exceptions. If you want to use the local web server manually, you can find information about it here:
 
 [https://cloud.google.com/appengine/docs/standard/java/tools/using-local-server](https://cloud.google.com/appengine/docs/standard/java/tools/using-local-server)
 
-Running the Dev App Server is done using this command:
+
+Running the local web server is done using this command:
 
 ```appengine-java-sdk\bin\dev_appserver.cmd [options] [WAR_DIRECTORY_LOCATION]```
 
-Notice that the last parameter is the location where the WAR directory is. This directory is the same thing as the exploded directory mentioned above. What this means is that the Dev App Server can only reference a single exploded directory. And here is the problem. If you have multiple modules making up multiple services, how is it even possible to load each one into a single running instance of the Dev App Server?
+Notice that the last parameter is the location where the WAR directory is. This directory is the same thing as the exploded directory that is at the project's root. Of course you can always specify any exploded directory. If you specified the exploded directory contained in a module's build directory, you would only be able to debug that module. By specifying the project's exploded directory, you can debug all the modules.
 
-The gradle plugin is able to do this although how it does it is not documented. But as mentioned a few times already, each module that it does upload to the Dev App Server gets assigned a random port number.
+In order to combine the outputs of each module's build, you can either do it manually, which is a pain, because you would have to repeat this every time you mnodify your code, or you can use a gradle task to do it for you automatically. In the project's root directory, if you open up the build.gradle file, there is a task called copyBuild. You can always run the task as follows:
 
-The key to bypassing the need for random port numbers is to combine the build outputs from each module into a single build directory and use that for the WAR_DIRECTORY_LOCATION parameter.
+```gradle copyBuild```
 
-An alternative approach would be to run a separate instance of the Dev App Server for each module, assigning each instance its own unique port. This approach is fine if you only had a few modules but would be a nightmare if you had a lot. You would also have to open up each module as a separate project in IntelliJ and attach each project to the running instance. For this reason, it really makes no sense to use multiple instances of the App Dev Server.
+This will copy all the files from each module's own exploded folder to build\exploded-<project-name>. You will probably seldom have to run this task on its own. Running **gradle build** automatically runs the copyBuild task. You do however need to modify the paths in the copyBuild task to point to each of your module's exploded folder. The exclude parameter is needed to prevent the appengine-web.xml and web.xml files from being copied. These files are needed in the combined directory but you must manually combine these and place the combined files in:
 
-In order to combine the outputs of each module's build, you can either do it manually, which is a pain, because you would have to repeat this every time you mnodify your code, or you can use a gradle task to do it for you automatically. In the project's root directory, if you open up the build.gradle file, you see a task called CopyBuild. You run the task as follows:
-
-```gradle CopyBuild```
-
-This will copy all the files from each module's own exploded folder to build\exploded-services. You need to modify the paths in the CopyBuild task to point to each of your module's exploded folder. The exclude parameter is needed to prevent the appengine-web.xml and web.xml files from being copied. These files are needed in the combined directory but you must manually combine these and place the combined files in:
-
-```build\exploded-services\WEB-INF```
+```build\exploded-<project-name>\WEB-INF```
 
 Only one appengine-web.xml and web.xml file can appear in this folder. When combining the contents of the appengine-web.xml, you should remove any lines that specify modules. For example remove this:
 
 ```<module>company-service</module>```
 
-Even if you don't remove it, there are no issues. But if you use the Dev App Server's admin console:
+Even if you don't remove it, there are no issues. But if you use the local web server's admin console:
 
 ```http://localhost:8080/_ah/```
 
@@ -90,9 +101,9 @@ and then click on the **Modules** link, you will see whatever the last module is
 
 NOTE: If you get an error when you click on the Modules link, you probably need to add a version tag to the appengine-web.xml file. But even with this error, your app is still not affected.
 
-The CopyBuild task copies and overwrites existing files. It never deletes files. So when you place your combined appengine-web.xml and web.xml into the output folder, you don't have to worry about it being deleted each time you run CopyBuild. The only time you need to update these files is when you add new modules or remove them.
+The copyBuild task copies and overwrites existing files. It never deletes files. So when you place your combined appengine-web.xml and web.xml into the output folder, you don't have to worry about it being deleted each time you run copyBuild. The only time you need to update these files is when you add new modules or remove them.
 
-## <a name="the-concept"></a>Routing Requests
+## <a name="routing-requests"></a>Routing Requests
 
 One of our goals is also to use a consistent url that closely matches the service endpoints when the app is deployed to GAE. Using urls like 
 
@@ -109,7 +120,7 @@ http://company.myapp-12345.appspot.com/
 http://employees.myapp-12345.appspot.com/
 ```
 
-Often your code in the servlet that handles these urls may need to have access to the project name or subdomain. There are APIs available that will resolve those when the app runs locally but this is really unnecessary. Using the same urls when testing locally and when deploying to GAE is really the way to go. Although the urls can be identical, the port number of the App Dev Server does need to be attached to the url. There is also the issue of how you deal with SSL. The Dev App Server cannot handle https. But in all likelihood, your deployed app to GAE will use it (and you should be using it if you are not). When https is used on GAE, the urls cannot use "." to separate subdomains. Instead you need to use -dot- in place of the ".". GAE will provide valid SSL certificates that use wildcards for subdomains. So the two above mentioned urls would be as follows:
+Often your code in the servlet that handles these urls may need to have access to the project name or subdomain. There are APIs available that will resolve those when the app runs locally but this is really unnecessary. Using the same urls when testing locally and when deploying to GAE is really the way to go. Although the urls can be identical, the port number of the local web server does need to be attached to the url. There is also the issue of how you deal with SSL. The Dev App Server cannot handle https. But in all likelihood, your deployed app to GAE will use it (and you should be using it if you are not). If you use the Charles web proxy tool, you can even map one url to a different one and even map from http to https. You can even eliminate the use of a port number. The Charles feature is known as **Map Remote** and is discussed later on. We'll assume that you don't use Charles and therefore need to handle https and port numbers. When https is used on GAE, the urls cannot use "." to separate subdomains. Instead you need to use -dot- in place of the ".". GAE will provide valid SSL certificates that use wildcards for subdomains. So the two above mentioned urls would be as follows:
 
 ```
 https://company-dot-myapp-12345.appspot.com/
@@ -127,7 +138,7 @@ While this alone would work, we can improve on this by including the name of the
 
 ```
 http://company-dot-myapp.appspot.com:8080/company/v1/
-http://employees-dot-myapp.appspot.com:8080/employees/v1
+http://employees-dot-myapp.appspot.com:8080/employees/v1/
 ```
 
 For reasons why you would do this, you should read up on:
@@ -160,31 +171,29 @@ The only downside to setting the domains in the hosts file is that when you want
 
 [https://www.charlesproxy.com/documentation/tools/map-remote/](https://www.charlesproxy.com/documentation/tools/map-remote/)
 
+Here is what the configuration in Map Remote would look like for the sample services used in this app:
+
+![Charles Map Remote](/images/charles-map-remote.png)
+
 ## <a name="the-concept">Running a Build
-To create the build files, you use your terminal (on a Mac) and navigate to the module's folder (not the project's root folder). Then you execute:
+To create the build files, you use your terminal (on a Mac) and navigate to the project's root folder and execute:
 
-```gradle assemble```
-
-Note: If you installed the Cloud SDK gradle plugin, don't run:
-
-```gradle appengineRun```
-
-While that builds the output files, it also runs the Dev App Server. You don't want to do that because you need to launch the Dev App Server after you've combined the output files.
-
-After you've built each module, use your terminal and change to the project's root and run:
-
-```gradle CopyBuild```
+```gradle build```
 
 If you haven't already done so, manually create the appengine-web.xml and web.xml files and copy those to the combined exploded folder as was previously mentioned.
 
 
 ## <a name="debugging-services">Debugging Services
 
-While IntelliJ is used here to debug the services, you can use any IDE that has the ability to attach to a JVM instance. Before you can debug the service, you need to make sure that App Dev Server is running. The sample app includes a bash script that you can run. In the project's root folder is a file called runApp.sh. To run this, in a terminal run:
+While IntelliJ is used here to debug the services, you can use any IDE that has the ability to attach to a JVM instance. Before you can debug the service, you need to make sure that local web server is running. You can run:
+
+```gradle appengineRun```
+
+Alternatively, you can run the script:
 
 ```sh runApp.sh```
 
-This will launch App Dev Server and load the exploded files.
+which is located in the project's root folder. This will let you see any problems when it attempts to load the project and let you see any exception messages that your app might generate. Make sure to replace the path to the exploded folder in this script to point to your own project's exploded folder.
 
 This same runApp.sh file is also present in the folder of each service. The path to the explode files is set for each of these modules. You can always run this script if you ever need to debug just the module's own code and where it does not depend on calling any external services. Just make sure that you change the path to the explode file to be where they are located within the module's own explode directory.
 
@@ -196,7 +205,13 @@ Save the configuration. Then hit the Debug button. You can now use breakpoints a
 
 ![Configuration Settings](/images/intellij-config-debug.png)
 
-It should be noted that every time you modify your code, you need to reload it into the App Dev Server. You need to stop the server with Ctl-C and restart it after you've recombined your modules.
+So now that the local web server is running and IntelliJ is running in Debug mode, whenever you make changes to your code, all you need to do is run:
+
+```gradle build```
+
+This will recompile your code, copy the build output files from each module to the project's root build and reload the new build into the local web server.
+
+There is however one minor issue to keep in mind. Even after **gradle build** has completed, you will probably have to wait about 8 seconds before the local web server has acknowledged the changes and completed updating the JVM. On my machine it took between 5 to 8 seconds. If you don't wait for this amount of time and make a request to your services, you will get served with the older version and breakpoints will not line up. If you find this annoyingly too long, you can always manually restart the local web server and then restart debugging in IntelliJ. If your fast enough and can do it under 8 seconds, that may be your preferred method. Be aware though that when you terminate the local web server (if it was started with **gradle appengineRun**), you need to wait until the JVM has stopped. The Java app icon on the OS taskbar needs to be gone. If it's not gone and you attempt to restart the web server, you will get an error indicating that the address is already in use. This doesn't happen if you start the web server manually (using **dev_appserver.sh**).
 
 ## <a name="deploying-to-gae">Deploying to GAE
 To deploy your services to GAE using gradle, you need to deploy each module separately although a gradle task could be used to do all of them at once. To deploy a module, use your terminal and navigate to the module's folder and run:
