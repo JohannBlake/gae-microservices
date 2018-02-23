@@ -60,7 +60,7 @@ When
 
 ```gradle build```
 
-is run from the root folder, it builds each module, which creates an output folder called **build/exploded-<module-name>** in the module's own folder, with <module-name> being the name of your module. A custom gradle task called syncBuild is then run, which runs the script syncbuild.sh which copies all the files from each of the module's build/exploded-<module-name> folder to a build folder in the project's root, which is called **build/exploded-<project-name>** where <project-name> is the name of your project.
+is run from the root folder, it builds each module, which creates an output folder called ```build/exploded-<module-name>``` in the module's own folder, with ```<module-name>``` being the name of your module. A custom gradle task called syncBuild is then run, which runs the script syncbuild.sh which copies all the files from each of the module's build/exploded-```<module-name>``` folder to a build folder in the project's root, which is called ```build/exploded-<project-name>``` where ```<project-name>``` is the name of your project.
 
 There is no need to stop debugging because a custom gradle task called **reloadApp** is executed after the copying has completed, which causes the local web server to reload the changes. Of course, you need to first start the local web server manually which is done by running:
 
@@ -85,7 +85,7 @@ In order to combine the outputs of each module's build, you can either do it man
 
 ```gradle syncBuild```
 
-This will copy all the files from each module's own exploded folder to build\exploded-<project-name>. You will probably seldom have to run this task on its own. Running **gradle build** automatically runs the syncBuild task. You do however need to modify the paths in the syncbuild.sh to point to each of your module's exploded folder. The exclude parameter is needed to prevent the appengine-web.xml and web.xml files from being copied. These files are needed in the combined directory but you must manually combine these and place the combined files in:
+This will copy all the files from each module's own exploded folder to build\exploded-project-name. You will probably seldom have to run this task on its own. Running **gradle build** automatically runs the syncBuild task. You do however need to modify the paths in the syncbuild.sh to point to each of your module's exploded folder. The exclude parameter is needed to prevent the appengine-web.xml and web.xml files from being copied. These files are needed in the combined directory but you must manually combine these and place the combined files in:
 
 ```build\exploded-<project-name>\WEB-INF```
 
@@ -243,12 +243,12 @@ appengine-web.xml
 web.xml
 ```
 
-As was already mentioned earlier, these are only used for debugging purposes. But if you run ```gradle appengineDeploy``` these two files will end up getting uploaded to GAE along with all the other files in this build folder. If appengine-web.xml has no <module> tag in it, the uploaded code will be treated as the default service and the code associated with the default service is all the code is the code located in this build folder. That is **not** what you want for your default service. Your default service would in fact end up containing all of your services in one service.
+As was already mentioned earlier, these are only used for debugging purposes. But if you run ```gradle appengineDeploy``` these two files will end up getting uploaded to GAE along with all the other files in this build folder. If appengine-web.xml has no ```<module>``` tag in it, the uploaded code will be treated as the default service and the code associated with the default service is all the code is the code located in this build folder. That is **not** what you want for your default service. Your default service would in fact end up containing all of your services in one service.
 
 For this reason, you should not run ```gradle appengineDeploy``` from the project's root. Instead, you should create a script that executes ```gradle appengineDeploy``` from each service's own folder. This will cause each service to be uploaded independently. There are apparently ways of deploying multiple services simultaneously but I haven't done that yet so I cannot comment on how that is accomplished.
 
-Even if you deploy each service independently, you still have the issue that you need to upload one of your services as the default service. To do that, you have to pick one of them to be your default and then modify the ```appengine-web.xml``` file and remove all <module> elements and then deploy that module. GAE will see that no <module> element exists and use that as your default service.
+Even if you deploy each service independently, you still have the issue that you need to upload one of your services as the default service. To do that, you have to pick one of them to be your default and then modify the ```appengine-web.xml``` file and remove all ```<module>``` elements and then deploy that module. GAE will see that no ```<module>``` element exists and use that as your default service.
 
-Probably the easiest way to do this is just comment out the <module> element and then deploy. But you must make sure to uncomment it and then deploy it again so that the service is loaded under its own name as well. A better solution would automate this task but I'll leave that up to you to figure out.
+Probably the easiest way to do this is just comment out the ```<module>``` element and then deploy. But you must make sure to uncomment it and then deploy it again so that the service is loaded under its own name as well. A better solution would automate this task but I'll leave that up to you to figure out.
 
 One problem I have encountered was when it failed to deploy and I discovered that I had to shut down Charles and comment out any of the mappings I made in the hosts file. It seems that the gradle task may need to address those urls as they would be available on GAE and not locally.
