@@ -60,7 +60,7 @@ When
 
 ```gradle build```
 
-is run from the root folder, it builds each module, which creates an output folder called **build/exploded-<module-name>** in the module's own folder, with <module-name> being the name of your module. A custom gradle task called copyBuild is then run, which copies all the files from each of the module's build/exploded-<module-name> folder to a build folder in the project's root, which is called **build/exploded-<project-name>** where <project-name> is the name of your project.
+is run from the root folder, it builds each module, which creates an output folder called **build/exploded-<module-name>** in the module's own folder, with <module-name> being the name of your module. A custom gradle task called syncBuild is then run, which runs the script syncbuild.sh which copies all the files from each of the module's build/exploded-<module-name> folder to a build folder in the project's root, which is called **build/exploded-<project-name>** where <project-name> is the name of your project.
 
 There is no need to stop debugging because a custom gradle task called **reloadApp** is executed after the copying has completed, which causes the local web server to reload the changes. Of course, you need to first start the local web server manually which is done by running:
 
@@ -81,11 +81,11 @@ Running the local web server is done using this command:
 
 Notice that the last parameter is the location where the WAR directory is. This directory is the same thing as the exploded directory that is at the project's root. Of course you can always specify any exploded directory. If you specified the exploded directory contained in a module's build directory, you would only be able to debug that module. By specifying the project's exploded directory, you can debug all the modules.
 
-In order to combine the outputs of each module's build, you can either do it manually, which is a pain, because you would have to repeat this every time you mnodify your code, or you can use a gradle task to do it for you automatically. In the project's root directory, if you open up the build.gradle file, there is a task called copyBuild. You can always run the task as follows:
+In order to combine the outputs of each module's build, you can either do it manually, which is a pain, because you would have to repeat this every time you modify your code, or you can use a gradle task to do it for you automatically. In the project's root directory, if you open up the build.gradle file, there is a task called syncBuild. You can always run the task as follows:
 
-```gradle copyBuild```
+```gradle syncBuild```
 
-This will copy all the files from each module's own exploded folder to build\exploded-<project-name>. You will probably seldom have to run this task on its own. Running **gradle build** automatically runs the copyBuild task. You do however need to modify the paths in the copyBuild task to point to each of your module's exploded folder. The exclude parameter is needed to prevent the appengine-web.xml and web.xml files from being copied. These files are needed in the combined directory but you must manually combine these and place the combined files in:
+This will copy all the files from each module's own exploded folder to build\exploded-<project-name>. You will probably seldom have to run this task on its own. Running **gradle build** automatically runs the syncBuild task. You do however need to modify the paths in the syncbuild.sh to point to each of your module's exploded folder. The exclude parameter is needed to prevent the appengine-web.xml and web.xml files from being copied. These files are needed in the combined directory but you must manually combine these and place the combined files in:
 
 ```build\exploded-<project-name>\WEB-INF```
 
@@ -101,7 +101,19 @@ and then click on the **Modules** link, you will see whatever the last module is
 
 NOTE: If you get an error when you click on the Modules link, you probably need to add a version tag to the appengine-web.xml file. But even with this error, your app is still not affected.
 
-The copyBuild task copies and overwrites existing files. It never deletes files. So when you place your combined appengine-web.xml and web.xml into the output folder, you don't have to worry about it being deleted each time you run copyBuild. The only time you need to update these files is when you add new modules or remove them.
+The syncbuild.sh scripte runs the rsync command which copies any new or changed files to the destination folder. It never deletes files. So when you place your combined appengine-web.xml and web.xml into the output folder, you don't have to worry about it being deleted each time you run the syncBuild task or syncbuild.sh script. The only time you need to update these files is when you add new modules or remove them.
+
+It should be pointed out that originally the gradle Copy task was used to copy files. While this initially worked, over time the copying starting taking enough time that it would cause the local dev server to crash. This was because the hot loading feature supported by the JVM option:
+
+> "-Dappengine.fullscan.seconds=5"
+
+would detect changes and apply those changes before all the files were copied over and as a result the app would not have the correct dependencies. The rsync command runs very fast and has not yet been an issue. For a large project though where a lot of changes occur, it is still possible that the local dev server will crash. If this happens, you just need to restart it.
+
+It is also possible that when syncbuild.sh is run that it will fail due to missing permissions on the file. For the script to be executed on a Mac, you should run the following command from a terminal window in the project's root folder:
+
+> chmod 755 syncbuild.sh
+
+This will allow the script to be run by other processes.
 
 ## <a name="routing-requests"></a>Routing Requests
 
@@ -214,10 +226,29 @@ This will recompile your code, copy the build output files from each module to t
 There is however one minor issue to keep in mind. Even after **gradle build** has completed, you will probably have to wait about 8 seconds before the local web server has acknowledged the changes and completed updating the JVM. On my machine it took between 5 to 8 seconds. If you don't wait for this amount of time and make a request to your services, you will get served with the older version and breakpoints will not line up. If you find this annoyingly too long, you can always manually restart the local web server and then restart debugging in IntelliJ. If your fast enough and can do it under 8 seconds, that may be your preferred method. Be aware though that when you terminate the local web server (if it was started with **gradle appengineRun**), you need to wait until the JVM has stopped. The Java app icon on the OS taskbar needs to be gone. If it's not gone and you attempt to restart the web server, you will get an error indicating that the address is already in use. This doesn't happen if you start the web server manually (using **dev_appserver.sh**).
 
 ## <a name="deploying-to-gae">Deploying to GAE
-To deploy your services to GAE using gradle, you can either deploy each module separately or deploy all of them together. To deploy run:
+To deploy your services to GAE using gradle, you can either deploy each module separately or deploy all of them together. To deploy, run:
 
 ```gradle appengineDeploy```
 
 If you run this from the project's root folder, all the modules will be deployed. If you run this from a module's directory, only that module will be deployed. Even if you deploy from the project's root folder, the gradle task will make sure to upload each appengine-web.xml and web.xml file for each module. It will not use the files from the combined build directory.
+
+There is however one issue that you need to be aware of when running appengineDeploy from the project's root folder. In the folder:
+
+> build/exploded-gae-microservices/WEB-INF
+
+are the two files:
+
+```
+appengine-web.xml
+web.xml
+```
+
+As was already mentioned earlier, these are only used for debugging purposes. But if you run ```gradle appengineDeploy``` these two files will end up getting uploaded to GAE along with all the other files in this build folder. If appengine-web.xml has no <module> tag in it, the uploaded code will be treated as the default service and the code associated with the default service is all the code is the code located in this build folder. That is **not** what you want for your default service. Your default service would in fact end up containing all of your services in one service.
+
+For this reason, you should not run ```gradle appengineDeploy``` from the project's root. Instead, you should create a script that executes ```gradle appengineDeploy``` from each service's own folder. This will cause each service to be uploaded independently. There are apparently ways of deploying multiple services simultaneously but I haven't done that yet so I cannot comment on how that is accomplished.
+
+Even if you deploy each service independently, you still have the issue that you need to upload one of your services as the default service. To do that, you have to pick one of them to be your default and then modify the ```appengine-web.xml``` file and remove all <module> elements and then deploy that module. GAE will see that no <module> element exists and use that as your default service.
+
+Probably the easiest way to do this is just comment out the <module> element and then deploy. But you must make sure to uncomment it and then deploy it again so that the service is loaded under its own name as well. A better solution would automate this task but I'll leave that up to you to figure out.
 
 One problem I have encountered was when it failed to deploy and I discovered that I had to shut down Charles and comment out any of the mappings I made in the hosts file. It seems that the gradle task may need to address those urls as they would be available on GAE and not locally.

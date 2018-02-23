@@ -36,26 +36,6 @@ appengine {
     }
 }
 
-task copyBuild(type: Copy) {
-    from('company-service/build/exploded-company-service') {
-        exclude '**/appengine-web.xml', '**/web.xml'
-    }
-    into('build/exploded-gae-microservices')
-
-    from('employees-service/build/exploded-employees-service'){
-        exclude '**/appengine-web.xml', '**/web.xml'
-    }
-    into('build/exploded-gae-microservices')
-}
-
-task reloadApp(type: Copy) {
-    dependsOn war
-
-    project.afterEvaluate {
-        into project.tasks.explodeWar.explodedAppDirectory
-        with war
-    }
-}
 
 task syncBuild(type: Exec) {
     workingDir './'
