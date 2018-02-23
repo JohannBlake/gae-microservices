@@ -57,10 +57,14 @@ task reloadApp(type: Copy) {
     }
 }
 
+task syncBuild(type: Exec) {
+    workingDir './'
+    commandLine './syncbuild.sh'
+}
+
 gradle.buildFinished { buildResult ->
     if (!buildResult.failure) {
-        copyBuild.execute()
-        reloadApp.execute()
+        syncBuild.execute()
     }
 }
 
