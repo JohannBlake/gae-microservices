@@ -179,13 +179,17 @@ Normally these changes take effect immediately but in some rare cases, if the DN
 
 ```dscacheutil -flushcache```
 
-The only downside to setting the domains in the hosts file is that when you want to test your app when it is running in GAE, you need to comment out the domain mappings in the host file. A second solution to avoid commenting and uncommenting out these domains is to use a tool like Charles, which is a web proxy. It has a feature known as **Map Remote**, which lets you map one domain to a different one. So you could map a call to a GAE endpoint to a local one instead without having to modify the hosts file. For more info on this feature, visit:
+The only downside to setting the domains in the hosts file is that when you want to test your app when it is running in GAE, you need to comment out the domain mappings in the host file. Another problem is that the hosts file only lets you specify ip addresses and not ports. Because of this, your http requests must still specify the port (typically 8080). Personally, I find this obnoxious since you then need to add code that determines whether you're running on your local dev machine or in production (on GAE). 
+
+A second solution to avoid commenting and uncommenting out these domains is to use a tool like Charles, which is a web proxy. You can also avoid the need to have to specify port numbers in your http requests. It has a feature known as **Map Remote**, which lets you map one domain to a different one. So you could map a call to a GAE endpoint to a local one instead without having to modify the hosts file. For more info on this feature, visit:
 
 [https://www.charlesproxy.com/documentation/tools/map-remote/](https://www.charlesproxy.com/documentation/tools/map-remote/)
 
 Here is what the configuration in Map Remote would look like for the sample services used in this app:
 
 ![Charles Map Remote](/images/charles-map-remote.png)
+
+> IMPORTANT: If you're developing a Node.js app and are using ```require('request')```,  your http requests will not be intercepted with Charles Map Remote unless you specify the port (8080) in your request. To get around this, use the jQuery.get() method instead.
 
 ## <a name="the-concept">Running a Build
 To create the build files, you use your terminal (on a Mac) and navigate to the project's root folder and execute:
